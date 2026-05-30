@@ -1,4 +1,5 @@
 import argparse
+from typing import Optional
 
 """Begin Phase"""
 """parser = argparse.ArgumentParser()
@@ -74,5 +75,51 @@ else:
 
 """-----------------------------------------------------------------------
 CUSTOM TYPE CONVERTERS
+
+- Allows you to specify custom typer converters for your command line arguments
+- xmpl: Handling arguments with different prefixes and process them accordingly
 --------------------------------------------------------------------------"""
-parser = argparse.ArgumentParser(prefix_chars="-+")
+"""parser = argparse.ArgumentParser(prefix_chars="-+")
+
+parser.add_argument('-a', metavar='<value>', action='append', type=lambda x: ('-', x))
+parser.add_argument('+a', metavar='<value>', action='append', type=lambda x: ('+', x))
+
+args = parser.parse_args()
+print(args)"""
+
+
+
+
+"""-----------------------------------------------------------------------
+USING DECORATORS TO DECLARE A COMMAND RUNNER
+
+- Allows us to define a command/commands for the arguments, cleaner than ->
+- repetitively using parser.add_argument()
+- 
+--------------------------------------------------------------------------"""
+# Create a command decorator
+parser = argparse.ArgumentParser()
+subparsers = parser.add_subparsers(required=True)   # require/allow subparsers
+
+
+def command(name: Optional[str] = None):
+    def decorator(func):
+        cmd = subparsers.add_parser(name)
+        cmd.set_defaults(func=func)
+        return cmd
+    
+    return decorator
+
+
+@command()
+def hello(args):
+    print('Hello')
+
+
+args = parser.parse_args()
+args.func(args)
+
+
+
+
+# if __name__ == '__main__':
