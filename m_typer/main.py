@@ -3,7 +3,7 @@ from typing import Optional
 
 app = typer.Typer()
 
-@app.command()
+
 def hello(name: Optional[str] = None):
     names = ['Kat', 'Richard', 'Dinesh']
 
