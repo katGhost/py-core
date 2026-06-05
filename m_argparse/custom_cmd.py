@@ -13,18 +13,23 @@ parser = argparse.ArgumentParser()
 subparsers = parser.add_subparsers(required=True)   # require/allow subparsers
 
 
-def command(name: Optional[str] = None):
+def command(name):
     def decorator(func):
         cmd = subparsers.add_parser(name)
-        cmd.set_defaults(func=func)
-        return cmd
+        func(cmd)
+        return func
     
     return decorator
 
 
-@command('--v')
-def hello(args):
-    print('Hello')
+@command('hello')
+def hello(cmd):
+    cmd.add_argument("names", nargs="+")   # take one or more
+    
+    def run(args):
+        print("hello", ",".join(args.names))
+    
+    cmd.set_defaults(func=run) 
 
 
 args = parser.parse_args()
