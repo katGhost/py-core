@@ -10,26 +10,56 @@ USING DECORATORS TO DECLARE A COMMAND RUNNER
 --------------------------------------------------------------------------"""
 # Create a command decorator
 parser = argparse.ArgumentParser()
-subparsers = parser.add_subparsers(required=True)   # require/allow subparsers
+subparsers = parser.add_subparsers(required=True, dest="command")   # require/allow subparsers
+
+arguments = [
+    {
+        "flags": ["square"],
+        "kwargs": {
+            "type": int,
+            "help": "display the square of a given number"
+        }
+    },
+    {   "flags": ["names"],
+        "kwargs": {
+            "type": str,
+            "help": "display the names(s) specified in the args"
+        }
+    },
+    {
+        "flags": ["-v", "--verbosity"],
+        "kwargs": {
+            "type": int,
+            "help": "increase the output verbosity"
+        }
+    },
+]
 
 
 def command(name):
     def decorator(func):
         cmd = subparsers.add_parser(name)
-        func(cmd)
+        
+        for arg in arguments:
+            cmd.add_argument(*arg["flags"], **arg["kwargs"])
+        
+        cmd.set_defaults(func=func)  # attach handler
         return func
-    
+
     return decorator
 
 
-@command('hello')
-def hello(cmd):
-    cmd.add_argument("names", nargs="+")   # take one or more
+@command("custom")
+def custom(args):
     
-    def run(args):
-        print("hello", ",".join(args.names))
     
-    cmd.set_defaults(func=run) 
+    if args.verbosity is None:
+        print(args.square **2)
+        print(args.names)
+    else:
+        print(f"{args}^ to the  args.square **2")
+        print(args.names)
+        
 
 
 args = parser.parse_args()
